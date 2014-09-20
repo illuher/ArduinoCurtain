@@ -1,0 +1,130 @@
+// Stepper motor control from Serial port
+// Send in format: direction speed stepcount with blank between values.
+// for direction 'l' for left and 'r' for right
+
+// Constant variables
+int input1 = 2;
+int input2 = 3;
+int input3 = 4;
+int input4 = 5;
+
+const int DIRECTION_LEFT = 108; // 'l' char
+const int DIRECTION_RIGHT = 114; // 'r' char
+
+void setup()
+{
+  pinMode(input1,OUTPUT);
+  pinMode(input2,OUTPUT);
+  pinMode(input3,OUTPUT);
+  pinMode(input4,OUTPUT);
+  
+  Serial.begin(9600);   
+}
+
+void loop()
+{
+   int dir = 0;
+   int stepperSpeed = 0;
+   int stepCount = 0;
+
+  
+  if (Serial.available() > 0)
+  {
+    dir =  Serial.read();
+    Serial.read();
+    stepperSpeed = Serial.parseInt();
+    Serial.read();
+    stepCount = Serial.parseInt();
+  }
+  
+  switch(dir)
+  {
+    case DIRECTION_LEFT:
+      Serial.println("Moving clockwise...");
+      moveClockwise(stepperSpeed, stepCount ) ;
+      break;
+      
+    case DIRECTION_RIGHT:
+      Serial.println("Moving counter clockwise...");
+      moveCounterClockwise(stepperSpeed, stepCount ) ;
+      break;
+    
+  }
+  
+  dir = 0;
+  stepperSpeed = 0;
+  stepCount = 0;
+  
+  delay(1000);
+}
+
+
+
+void moveClockwise(int mySpeed, int stepCount ) 
+{
+  for(int i = 0; i < stepCount; i++)
+  {
+    //4th step
+    digitalWrite(input1,HIGH);
+    digitalWrite(input2,LOW);
+    digitalWrite(input3,HIGH);
+    digitalWrite(input4,LOW);
+    delay(mySpeed);
+    
+    //3rd step
+    digitalWrite(input1,LOW);
+    digitalWrite(input2,HIGH);
+    digitalWrite(input3,HIGH);
+    digitalWrite(input4,LOW);
+    delay(mySpeed);
+    
+    //2nd step
+    digitalWrite(input1,LOW);
+    digitalWrite(input2,HIGH);
+    digitalWrite(input3,LOW);
+    digitalWrite(input4,HIGH);
+    delay(mySpeed);
+    
+    //1st step
+    digitalWrite(input1,HIGH);
+    digitalWrite(input2,LOW);
+    digitalWrite(input3,LOW);
+    digitalWrite(input4,HIGH);
+    delay(mySpeed);  //small delay between each step of 10ms
+  }
+}
+
+void moveCounterClockwise(int mySpeed, int stepCount ) 
+{
+  for(int i = 0; i < stepCount; i++)
+  {
+    //1st step
+    digitalWrite(input1,HIGH);
+    digitalWrite(input2,LOW);
+    digitalWrite(input3,LOW);
+    digitalWrite(input4,HIGH);
+    delay(mySpeed);  //small delay between each step of 10ms
+    
+      //2nd step
+    digitalWrite(input1,LOW);
+    digitalWrite(input2,HIGH);
+    digitalWrite(input3,LOW);
+    digitalWrite(input4,HIGH);
+    delay(mySpeed);
+    
+      //3rd step
+    digitalWrite(input1,LOW);
+    digitalWrite(input2,HIGH);
+    digitalWrite(input3,HIGH);
+    digitalWrite(input4,LOW);
+    delay(mySpeed);
+    
+    //4th step
+    
+    digitalWrite(input1,HIGH);
+    digitalWrite(input2,LOW);
+    digitalWrite(input3,HIGH);
+    digitalWrite(input4,LOW);
+    delay(mySpeed);
+  }
+}
