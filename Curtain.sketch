@@ -11,6 +11,9 @@ int input4 = 5;
 const int DIRECTION_LEFT = 108; // 'l' char
 const int DIRECTION_RIGHT = 114; // 'r' char
 
+const int buttonLeft = 8;     // the number of the pushbutton pin
+const int buttonRight = 7;     // the number of the pushbutton pin
+
 void setup()
 {
   pinMode(input1,OUTPUT);
@@ -18,15 +21,21 @@ void setup()
   pinMode(input3,OUTPUT);
   pinMode(input4,OUTPUT);
   
+  pinMode(buttonLeft, INPUT);  
+  pinMode(buttonRight, INPUT);  
+
+  digitalWrite(buttonLeft, HIGH);  
+  digitalWrite(buttonRight, HIGH);  
+  
   Serial.begin(9600);   
 }
 
 void loop()
 {
-   int dir = 0;
-   int stepperSpeed = 0;
-   int stepCount = 0;
-
+  int buttonState = 0; 
+  int dir = 0;
+  int stepperSpeed = 0;
+  int stepCount = 0;
   
   if (Serial.available() > 0)
   {
@@ -48,14 +57,23 @@ void loop()
       Serial.println("Moving counter clockwise...");
       moveCounterClockwise(stepperSpeed, stepCount ) ;
       break;
-    
   }
   
   dir = 0;
   stepperSpeed = 0;
   stepCount = 0;
   
-  delay(1000);
+  // Check if button pressed:
+  buttonState = digitalRead(buttonLeft);
+  if (buttonState == LOW) {     
+     moveClockwise(4, 1 ) ;
+  } 
+  buttonState = digitalRead(buttonRight);
+  if (buttonState == LOW) {     
+     moveCounterClockwise(4, 1 ) ;
+  } 
+  
+  //delay(1000);
 }
 
 
