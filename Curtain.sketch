@@ -2,20 +2,31 @@
 // Send in format: direction speed stepcount with blank between values.
 // for direction 'l' for left and 'r' for right
 
+#include <EEPROM.h> //Needed to access the eeprom read write functions
+
 // Constant variables
 int input1 = 2;
 int input2 = 3;
 int input3 = 4;
 int input4 = 5;
 
-const int DIRECTION_LEFT = 108; // 'l' char
+const int DIRECTION_LEFT = 108;  // 'l' char
 const int DIRECTION_RIGHT = 114; // 'r' char
 
-const int buttonLeft = 8;     // the number of the pushbutton pin
+const int buttonLeft = 8;      // the number of the pushbutton pin
 const int buttonRight = 7;     // the number of the pushbutton pin
+
+const int CMD_MOVE = 109;         // 'm' char
+const int CMD_SET_POSITION = 115; // 's' char
+
+int Position = 0;
+
+
 
 void setup()
 {
+  Serial.begin(9600);
+  
   pinMode(input1,OUTPUT);
   pinMode(input2,OUTPUT);
   pinMode(input3,OUTPUT);
@@ -26,25 +37,66 @@ void setup()
 
   digitalWrite(buttonLeft, HIGH);  
   digitalWrite(buttonRight, HIGH);  
-  
-  Serial.begin(9600);   
+     
+  // Load current position from EEPROM
+  Position = EEPROMReadInt(0);
 }
 
 void loop()
 {
+  int cmd = 0;
   int buttonState = 0; 
+  
+  
+  if (Serial.available() > 0)
+  {
+    cmd = Serial.read();
+  }
+  
+  switch(cmd)
+  {
+    case CMD_MOVE:
+      readMovement();
+      break;
+    
+    case CMD_SET_POSITION:
+      readSetPosition();
+      break;
+  }
+  
+  // Check if button pressed:
+  buttonState = digitalRead(buttonLeft);
+  if (buttonState == LOW) {     
+     moveClockwise(4, 1 ) ;
+  } 
+  buttonState = digitalRead(buttonRight);
+  if (buttonState == LOW) {     
+     moveCounterClockwise(4, 1 ) ;
+  } 
+  //delay(1000);
+}
+
+
+void readSetPosition()
+{
+  Serial.read();
+  Position =   Serial.parseInt();
+  EEPROMWriteInt(0, Position);
+}
+
+
+void readMovement()
+{ 
   int dir = 0;
   int stepperSpeed = 0;
   int stepCount = 0;
   
-  if (Serial.available() > 0)
-  {
-    dir =  Serial.read();
-    Serial.read();
-    stepperSpeed = Serial.parseInt();
-    Serial.read();
-    stepCount = Serial.parseInt();
-  }
+  Serial.read();
+  dir =  Serial.read();
+  Serial.read();
+  stepperSpeed = Serial.parseInt();
+  Serial.read();
+  stepCount = Serial.parseInt(); 
   
   switch(dir)
   {
@@ -58,28 +110,36 @@ void loop()
       moveCounterClockwise(stepperSpeed, stepCount ) ;
       break;
   }
-  
-  dir = 0;
-  stepperSpeed = 0;
-  stepCount = 0;
-  
-  // Check if button pressed:
-  buttonState = digitalRead(buttonLeft);
-  if (buttonState == LOW) {     
-     moveClockwise(4, 1 ) ;
-  } 
-  buttonState = digitalRead(buttonRight);
-  if (buttonState == LOW) {     
-     moveCounterClockwise(4, 1 ) ;
-  } 
-  
-  //delay(1000);
 }
 
+
+//This function will write a 2 byte integer to the eeprom at the specified address and address + 1
+void EEPROMWriteInt(int p_address, int p_value)
+{
+  byte lowByte = ((p_value >> 0) & 0xFF);
+  byte highByte = ((p_value >> 8) & 0xFF);
+
+  EEPROM.write(p_address, lowByte);
+  EEPROM.write(p_address + 1, highByte);
+}
+
+//This function will read a 2 byte integer from the eeprom at the specified address and address + 1
+unsigned int EEPROMReadInt(int p_address)
+{
+  byte lowByte = EEPROM.read(p_address);
+  byte highByte = EEPROM.read(p_address + 1);
+
+  return ((lowByte << 0) & 0xFF) + ((highByte << 8) & 0xFF00);
+}
 
 
 void moveClockwise(int mySpeed, int stepCount ) 
 {
+  if (Serial.available() > 0)
+  {
+    Serial.read();
+    return;
+  }
   for(int i = 0; i < stepCount; i++)
   {
     //4th step
@@ -109,11 +169,19 @@ void moveClockwise(int mySpeed, int stepCount )
     digitalWrite(input3,LOW);
     digitalWrite(input4,HIGH);
     delay(mySpeed);  //small delay between each step of 10ms
+    
+    Position++;
+    EEPROMWriteInt(0, Position);
   }
 }
 
 void moveCounterClockwise(int mySpeed, int stepCount ) 
 {
+  if (Serial.available() > 0)
+  {
+    Serial.read();
+    return;
+  }
   for(int i = 0; i < stepCount; i++)
   {
     //1st step
@@ -144,5 +212,8 @@ void moveCounterClockwise(int mySpeed, int stepCount )
     digitalWrite(input3,HIGH);
     digitalWrite(input4,LOW);
     delay(mySpeed);
+    
+    Position--;
+    EEPROMWriteInt(0, Position);
   }
 }
