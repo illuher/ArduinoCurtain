@@ -18,6 +18,7 @@ const int buttonRight = 7;     // the number of the pushbutton pin
 
 const int CMD_MOVE = 109;         // 'm' char
 const int CMD_SET_POSITION = 115; // 's' char
+const int CMD_GET_POSITION = 112; // 'p' char
 
 int Position = 0;
 
@@ -45,8 +46,7 @@ void setup()
 void loop()
 {
   int cmd = 0;
-  int buttonState = 0; 
-  
+  int buttonState = 0;
   
   if (Serial.available() > 0)
   {
@@ -61,6 +61,10 @@ void loop()
     
     case CMD_SET_POSITION:
       readSetPosition();
+      break;
+      
+    case CMD_GET_POSITION:
+      Serial.println(Position,DEC);
       break;
   }
   
@@ -92,12 +96,12 @@ void readMovement()
   int stepCount = 0;
   
   Serial.read();
-  dir =  Serial.read();
+  dir =  Serial.parseInt();
   Serial.read();
   stepperSpeed = Serial.parseInt();
   Serial.read();
   stepCount = Serial.parseInt(); 
-  
+
   switch(dir)
   {
     case DIRECTION_LEFT:
@@ -133,6 +137,104 @@ unsigned int EEPROMReadInt(int p_address)
 }
 
 
+void moveClockwise(int mySpeed, int stepCount ) 
+{
+  if (Serial.available() > 0)
+  {
+    Serial.read();
+    return;
+  }
+  for(int i = 0; i < stepCount; i++)
+  {
+    //4th step
+    digitalWrite(input1,LOW);
+    digitalWrite(input2,LOW);
+    digitalWrite(input3,LOW);
+    digitalWrite(input4,HIGH);
+    delay(mySpeed);
+    
+    //3rd step
+    digitalWrite(input1,LOW);
+    digitalWrite(input2,LOW);
+    digitalWrite(input3,HIGH);
+    digitalWrite(input4,LOW);
+    delay(mySpeed);
+    
+    //2nd step
+    digitalWrite(input1,LOW);
+    digitalWrite(input2,HIGH);
+    digitalWrite(input3,LOW);
+    digitalWrite(input4,LOW);
+    delay(mySpeed);
+    
+    //1st step
+    digitalWrite(input1,HIGH);
+    digitalWrite(input2,LOW);
+    digitalWrite(input3,LOW);
+    digitalWrite(input4,LOW);
+    delay(mySpeed);  //small delay between each step of 10ms
+    
+    Position++;
+    if(Position > 1050)
+    {
+      Position = 1050;
+      return;
+    }
+    EEPROMWriteInt(0, Position);
+  }
+}
+
+void moveCounterClockwise(int mySpeed, int stepCount ) 
+{
+  if (Serial.available() > 0)
+  {
+    Serial.read();
+    return;
+  }
+  for(int i = 0; i < stepCount; i++)
+  {
+    //1st step
+    digitalWrite(input1,HIGH);
+    digitalWrite(input2,LOW);
+    digitalWrite(input3,LOW);
+    digitalWrite(input4,LOW);
+    delay(mySpeed);  //small delay between each step of 10ms
+    
+      //2nd step
+    digitalWrite(input1,LOW);
+    digitalWrite(input2,HIGH);
+    digitalWrite(input3,LOW);
+    digitalWrite(input4,LOW);
+    delay(mySpeed);
+    
+      //3rd step
+    digitalWrite(input1,LOW);
+    digitalWrite(input2,LOW);
+    digitalWrite(input3,HIGH);
+    digitalWrite(input4,LOW);
+    delay(mySpeed);
+    
+    //4th step
+    
+    digitalWrite(input1,LOW);
+    digitalWrite(input2,LOW);
+    digitalWrite(input3,LOW);
+    digitalWrite(input4,HIGH);
+    delay(mySpeed);
+    
+    Position--;
+    if(Position < 0)
+    {
+      Position = 0;
+      return;
+    }
+    
+    EEPROMWriteInt(0, Position);
+  }
+}
+
+
+/*
 void moveClockwise(int mySpeed, int stepCount ) 
 {
   if (Serial.available() > 0)
@@ -216,4 +318,4 @@ void moveCounterClockwise(int mySpeed, int stepCount )
     Position--;
     EEPROMWriteInt(0, Position);
   }
-}
+}*/
