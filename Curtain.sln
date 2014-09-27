@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curtain", "Curtain\Curtain.csproj", "{E2949873-A31E-4BF4-A118-9375B32A1AE3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CurtainDriver", "CurtainDriver\CurtainDriver.csproj", "{3BBD405E-5FB9-4EC1-850B-571238D68CAF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CurtainWindows", "CurtainWindows\CurtainWindows.csproj", "{8DFC9697-6791-4511-8355-F830050267E7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E2949873-A31E-4BF4-A118-9375B32A1AE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2949873-A31E-4BF4-A118-9375B32A1AE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2949873-A31E-4BF4-A118-9375B32A1AE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2949873-A31E-4BF4-A118-9375B32A1AE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BBD405E-5FB9-4EC1-850B-571238D68CAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BBD405E-5FB9-4EC1-850B-571238D68CAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BBD405E-5FB9-4EC1-850B-571238D68CAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BBD405E-5FB9-4EC1-850B-571238D68CAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DFC9697-6791-4511-8355-F830050267E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DFC9697-6791-4511-8355-F830050267E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DFC9697-6791-4511-8355-F830050267E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DFC9697-6791-4511-8355-F830050267E7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		VisualSVNWorkingCopyRoot = .
+	EndGlobalSection
+EndGlobal
