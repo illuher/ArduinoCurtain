@@ -105,12 +105,10 @@ void readMovement()
   switch(dir)
   {
     case DIRECTION_LEFT:
-      Serial.println("Moving clockwise...");
       moveClockwise(stepperSpeed, stepCount ) ;
       break;
       
     case DIRECTION_RIGHT:
-      Serial.println("Moving counter clockwise...");
       moveCounterClockwise(stepperSpeed, stepCount ) ;
       break;
   }
@@ -139,11 +137,11 @@ unsigned int EEPROMReadInt(int p_address)
 
 void moveClockwise(int mySpeed, int stepCount ) 
 {
-  if (Serial.available() > 0)
+  /*if (Serial.available() > 0)
   {
     Serial.read();
     return;
-  }
+  }*/
   for(int i = 0; i < stepCount; i++)
   {
     //4th step
@@ -186,11 +184,11 @@ void moveClockwise(int mySpeed, int stepCount )
 
 void moveCounterClockwise(int mySpeed, int stepCount ) 
 {
-  if (Serial.available() > 0)
+  /*if (Serial.available() > 0)
   {
     Serial.read();
     return;
-  }
+  }*/
   for(int i = 0; i < stepCount; i++)
   {
     //1st step
