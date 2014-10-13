@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -25,7 +26,7 @@ namespace CurtainWindows
 
             InitializeComponent();
             this.BaudRate = 9600;
-            this.PortName = "COM5";
+            this.PortName = "COM7";
             this.tbBaudRate.Text = this.BaudRate.ToString();
             this.tbPortName.Text = this.PortName;
 
@@ -63,6 +64,11 @@ namespace CurtainWindows
                 return;
             }
             this.BaudRate = tmp;
+            if (this.curtain != null)
+            {
+                this.curtain._port.Dispose();
+                this.curtain = null;
+            }
             this.curtain = new CurtainDriver.Curtain(this.PortName, this.BaudRate);
             if (!curtain.Connect())
             {
@@ -73,6 +79,7 @@ namespace CurtainWindows
             {
                 toolStripStatusLabel.Text = "Connected";
                 toolStripStatusLabel.ForeColor = Color.Green;
+                Thread.Sleep(1000);
                 trackBarPosition.Value = curtain.GetPosition();
                 this.tbPosition.Text = trackBarPosition.Value.ToString();
             }

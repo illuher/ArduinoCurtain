@@ -48,6 +48,7 @@
             this.trackBarPosition.Location = new System.Drawing.Point(12, 44);
             this.trackBarPosition.Maximum = 1050;
             this.trackBarPosition.Name = "trackBarPosition";
+            this.trackBarPosition.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.trackBarPosition.Size = new System.Drawing.Size(781, 45);
             this.trackBarPosition.TabIndex = 0;
             this.trackBarPosition.Scroll += new System.EventHandler(this.trackBar1_Scroll);
