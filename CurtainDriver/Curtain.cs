@@ -18,7 +18,7 @@ namespace CurtainDriver
 
         public const string MOVE_LEFT = "114";
         public const string MOVE_RIGHT = "108";
-        
+
         public SerialPort _port;
 
         public bool IsConnected { get { return this._port == null ? false : this._port.IsOpen; } }
@@ -40,15 +40,30 @@ namespace CurtainDriver
             return this.IsConnected;
         }
 
+        public void Disconnect()
+        {
+            try
+            {
+
+                this._port.Close();
+            }
+            catch (Exception)  { }
+        }
+
         public int GetPosition()
         {
+            this.Connect();
             int position = -1;
 
             if (!this.IsConnected)
+            {
+                this.Disconnect();
                 return -1;
+            }
 
             this._port.WriteLine(Curtain.CMD_POSITION_GET);
             string pos = this._port.ReadLine();
+            this.Disconnect();
             int.TryParse(pos, out position);
 
             return position;
@@ -56,20 +71,22 @@ namespace CurtainDriver
 
         public void MoveToPosition(int newPosition, int speed = 5)
         {
-            if (newPosition > Curtain.POSITION_MAX || newPosition < Curtain.POSITION_MIN || !this.IsConnected)
+            if (newPosition > Curtain.POSITION_MAX || newPosition < Curtain.POSITION_MIN)
             {
                 return;
             }
-
+           
             int diff = this.GetPosition() - newPosition;
             string direction = Curtain.MOVE_LEFT;
-            if(diff < 0)
+            if (diff < 0)
             {
                 direction = Curtain.MOVE_RIGHT;
             }
             string command = Curtain.CMD_MOVE + " " + direction + " " + speed + " " + Math.Abs(diff);
+
+            this.Connect();
             this._port.WriteLine(command);
-           // Console.WriteLine(this._port.ReadLine());
+            this.Disconnect();
         }
     }
 }

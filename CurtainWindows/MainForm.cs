@@ -69,7 +69,9 @@ namespace CurtainWindows
                 this.curtain._port.Dispose();
                 this.curtain = null;
             }
+
             this.curtain = new CurtainDriver.Curtain(this.PortName, this.BaudRate);
+            
             if (!curtain.Connect())
             {
                 toolStripStatusLabel.Text = "Connection failed!!!";
