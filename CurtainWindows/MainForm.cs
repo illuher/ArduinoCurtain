@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CurtainDriver;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -32,7 +33,32 @@ namespace CurtainWindows
 
             CheckConnection();
 
+            string line;
+            string[] linePrams;
+            List<MovementRequest> mrl = new List<MovementRequest>();
 
+            using (System.IO.StreamReader file = new System.IO.StreamReader(Environment.CurrentDirectory + "\\" + "MovementRequests.txt"))
+            {
+                while ((line = file.ReadLine()) != null)
+                {
+                    linePrams = line.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                    if (linePrams.Length != 3)
+                        continue;
+                    MovementRequest mr = new MovementRequest();
+                    mr.Position = Convert.ToInt32(linePrams[2]);
+                    mr.Day = (DayOfWeek)Convert.ToInt32(linePrams[0]);
+                    mr.Time = TimeSpan.Parse(linePrams[1]);
+                    mrl.Add(mr);
+                    MessageBox.Show(line);
+                }
+
+                file.Close();
+            }
+
+            if (mrl.Count > 0)
+            {
+                this.curtain.StartPending(mrl);
+            }
         }
 
         private void trackBar1_Scroll(object sender, EventArgs e)

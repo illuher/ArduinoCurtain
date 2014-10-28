@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CurtainDriver
@@ -88,5 +89,38 @@ namespace CurtainDriver
             this._port.WriteLine(command);
             this.Disconnect();
         }
+
+        public void StartPending(List<MovementRequest> list)
+        {
+            Thread t = new Thread(()=>{
+                while (true)
+                {
+                    var next = from x in list
+                               where x.Day == DateTime.Now.DayOfWeek && x.Time >= DateTime.Now - DateTime.Today
+                               orderby x.Time ascending
+                               select x;
+
+                    if (next != null && next.Count() > 0)
+                    {
+                        MovementRequest r = next.First();
+                        Thread.Sleep(DateTime.Today + r.Time - DateTime.Now);
+                        try
+                        {
+                            this.MoveToPosition(r.Position);
+                        }
+                        catch (Exception) { }
+                        Console.WriteLine(r.Position);
+                    }
+                    else
+                    {
+                        Thread.Sleep(DateTime.Today.AddDays(1) - DateTime.Now);
+                    }
+                }
+            });
+            t.IsBackground = true;
+            t.Start();
+        }
+
+
     }
 }
