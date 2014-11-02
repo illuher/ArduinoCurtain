@@ -100,7 +100,7 @@ namespace CurtainDriver
                                orderby x.Time ascending
                                select x;
 
-                    if (next != null && next.Count() > 0)
+                    if (next.Any())
                     {
                         MovementRequest r = next.First();
                         Thread.Sleep(DateTime.Today + r.Time - DateTime.Now);
@@ -109,7 +109,7 @@ namespace CurtainDriver
                             this.MoveToPosition(r.Position);
                         }
                         catch (Exception) { }
-                        Console.WriteLine(r.Position);
+                        //Console.WriteLine(r.Position);
                     }
                     else
                     {

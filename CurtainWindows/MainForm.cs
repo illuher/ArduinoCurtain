@@ -49,7 +49,7 @@ namespace CurtainWindows
                     mr.Day = (DayOfWeek)Convert.ToInt32(linePrams[0]);
                     mr.Time = TimeSpan.Parse(linePrams[1]);
                     mrl.Add(mr);
-                    MessageBox.Show(line);
+                    //MessageBox.Show(line);
                 }
 
                 file.Close();
