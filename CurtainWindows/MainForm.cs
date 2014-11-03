@@ -1,52 +1,43 @@
-﻿using CurtainDriver;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
+using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using CurtainDriver;
 
 namespace CurtainWindows
 {
     public partial class frmMain : Form
     {
-        public int BaudRate { get; set; }
-        public string PortName { get; set; }
-
         //CurtainDriver.Curtain curtain = new CurtainDriver.Curtain("COM4", 9600);
-        CurtainDriver.Curtain curtain;
+        private Curtain curtain;
 
 
         public frmMain()
         {
-
-
             InitializeComponent();
-            this.BaudRate = 9600;
-            this.PortName = "COM7";
-            this.tbBaudRate.Text = this.BaudRate.ToString();
-            this.tbPortName.Text = this.PortName;
+            BaudRate = 9600;
+            PortName = "COM7";
+            tbBaudRate.Text = BaudRate.ToString();
+            tbPortName.Text = PortName;
 
             CheckConnection();
 
             string line;
             string[] linePrams;
-            List<MovementRequest> mrl = new List<MovementRequest>();
+            var mrl = new List<MovementRequest>();
 
-            using (System.IO.StreamReader file = new System.IO.StreamReader(Environment.CurrentDirectory + "\\" + "MovementRequests.txt"))
+            using (var file = new StreamReader(Environment.CurrentDirectory + "\\" + "MovementRequests.txt"))
             {
                 while ((line = file.ReadLine()) != null)
                 {
-                    linePrams = line.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                    linePrams = line.Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
                     if (linePrams.Length != 3)
                         continue;
-                    MovementRequest mr = new MovementRequest();
+                    var mr = new MovementRequest();
                     mr.Position = Convert.ToInt32(linePrams[2]);
-                    mr.Day = (DayOfWeek)Convert.ToInt32(linePrams[0]);
+                    mr.Day = (DayOfWeek) Convert.ToInt32(linePrams[0]);
                     mr.Time = TimeSpan.Parse(linePrams[1]);
                     mrl.Add(mr);
                     //MessageBox.Show(line);
@@ -57,13 +48,16 @@ namespace CurtainWindows
 
             if (mrl.Count > 0)
             {
-                this.curtain.StartPending(mrl);
+                curtain.StartPending(mrl);
             }
         }
 
+        public int BaudRate { get; set; }
+        public string PortName { get; set; }
+
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
-            this.tbPosition.Text = trackBarPosition.Value.ToString();
+            tbPosition.Text = trackBarPosition.Value.ToString();
         }
 
         private void btnGo_Click(object sender, EventArgs e)
@@ -71,7 +65,6 @@ namespace CurtainWindows
             //MessageBox.Show(trackBarPosition.Value.ToString());
 
             curtain.MoveToPosition(trackBarPosition.Value);
-
         }
 
         private void btnConnect_Click(object sender, EventArgs e)
@@ -81,7 +74,7 @@ namespace CurtainWindows
 
         private void CheckConnection()
         {
-            this.PortName = tbPortName.Text.Trim();
+            PortName = tbPortName.Text.Trim();
             int tmp;
             if (!int.TryParse(tbBaudRate.Text, out tmp))
             {
@@ -89,14 +82,14 @@ namespace CurtainWindows
                 toolStripStatusLabel.ForeColor = Color.Red;
                 return;
             }
-            this.BaudRate = tmp;
-            if (this.curtain != null)
+            BaudRate = tmp;
+            if (curtain != null)
             {
-                this.curtain._port.Dispose();
-                this.curtain = null;
+                curtain._port.Dispose();
+                curtain = null;
             }
 
-            this.curtain = new CurtainDriver.Curtain(this.PortName, this.BaudRate);
+            curtain = new Curtain(PortName, BaudRate);
 
             if (!curtain.Connect())
             {
@@ -109,27 +102,28 @@ namespace CurtainWindows
                 toolStripStatusLabel.ForeColor = Color.Green;
                 Thread.Sleep(1000);
                 trackBarPosition.Value = curtain.GetPosition();
-                this.tbPosition.Text = trackBarPosition.Value.ToString();
+                tbPosition.Text = trackBarPosition.Value.ToString();
             }
         }
 
         private void frmMain_Resize(object sender, EventArgs e)
         {
-            if (this.WindowState == FormWindowState.Minimized)
+            if (WindowState == FormWindowState.Minimized)
             {
-                this.Hide();
+                Hide();
             }
         }
 
         private void notifyIcon_DoubleClick(object sender, EventArgs e)
         {
-            this.Show();
-            this.WindowState = FormWindowState.Normal;
+            Show();
+            WindowState = FormWindowState.Normal;
         }
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (MessageBox.Show("Really close?", "Confirm program termination", MessageBoxButtons.YesNo) == DialogResult.No)
+            if (MessageBox.Show("Really close?", "Confirm program termination", MessageBoxButtons.YesNo) ==
+                DialogResult.No)
             {
                 e.Cancel = true;
             }

@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace CurtainDriver
 {
@@ -22,49 +20,53 @@ namespace CurtainDriver
 
         public SerialPort _port;
 
-        public bool IsConnected { get { return this._port == null ? false : this._port.IsOpen; } }
-
         public Curtain(string name, int baudRate)
         {
-            this._port = new SerialPort(name, baudRate);
+            _port = new SerialPort(name, baudRate);
+        }
+
+        public bool IsConnected
+        {
+            get { return _port == null ? false : _port.IsOpen; }
         }
 
         public bool Connect()
         {
             try
             {
-                this._port.Open();
+                _port.Open();
             }
             catch (Exception)
             {
             }
-            return this.IsConnected;
+            return IsConnected;
         }
 
         public void Disconnect()
         {
             try
             {
-
-                this._port.Close();
+                _port.Close();
             }
-            catch (Exception)  { }
+            catch (Exception)
+            {
+            }
         }
 
         public int GetPosition()
         {
-            this.Connect();
+            Connect();
             int position = -1;
 
-            if (!this.IsConnected)
+            if (!IsConnected)
             {
-                this.Disconnect();
+                Disconnect();
                 return -1;
             }
 
-            this._port.WriteLine(Curtain.CMD_POSITION_GET);
-            string pos = this._port.ReadLine();
-            this.Disconnect();
+            _port.WriteLine(CMD_POSITION_GET);
+            string pos = _port.ReadLine();
+            Disconnect();
             int.TryParse(pos, out position);
 
             return position;
@@ -72,33 +74,34 @@ namespace CurtainDriver
 
         public void MoveToPosition(int newPosition, int speed = 5)
         {
-            if (newPosition > Curtain.POSITION_MAX || newPosition < Curtain.POSITION_MIN)
+            if (newPosition > POSITION_MAX || newPosition < POSITION_MIN)
             {
                 return;
             }
-           
-            int diff = this.GetPosition() - newPosition;
-            string direction = Curtain.MOVE_LEFT;
+
+            int diff = GetPosition() - newPosition;
+            string direction = MOVE_LEFT;
             if (diff < 0)
             {
-                direction = Curtain.MOVE_RIGHT;
+                direction = MOVE_RIGHT;
             }
-            string command = Curtain.CMD_MOVE + " " + direction + " " + speed + " " + Math.Abs(diff);
+            string command = CMD_MOVE + " " + direction + " " + speed + " " + Math.Abs(diff);
 
-            this.Connect();
-            this._port.WriteLine(command);
-            this.Disconnect();
+            Connect();
+            _port.WriteLine(command);
+            Disconnect();
         }
 
         public void StartPending(List<MovementRequest> list)
         {
-            Thread t = new Thread(()=>{
+            var t = new Thread(() =>
+            {
                 while (true)
                 {
-                    var next = from x in list
-                               where x.Day == DateTime.Now.DayOfWeek && x.Time >= DateTime.Now - DateTime.Today
-                               orderby x.Time ascending
-                               select x;
+                    IOrderedEnumerable<MovementRequest> next = from x in list
+                        where x.Day == DateTime.Now.DayOfWeek && x.Time >= DateTime.Now - DateTime.Today
+                        orderby x.Time ascending
+                        select x;
 
                     if (next.Any())
                     {
@@ -106,9 +109,11 @@ namespace CurtainDriver
                         Thread.Sleep(DateTime.Today + r.Time - DateTime.Now);
                         try
                         {
-                            this.MoveToPosition(r.Position);
+                            MoveToPosition(r.Position);
                         }
-                        catch (Exception) { }
+                        catch (Exception)
+                        {
+                        }
                         //Console.WriteLine(r.Position);
                     }
                     else
@@ -120,7 +125,5 @@ namespace CurtainDriver
             t.IsBackground = true;
             t.Start();
         }
-
-
     }
 }
