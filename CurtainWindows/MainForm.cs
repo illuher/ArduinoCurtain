@@ -97,7 +97,7 @@ namespace CurtainWindows
             }
 
             this.curtain = new CurtainDriver.Curtain(this.PortName, this.BaudRate);
-            
+
             if (!curtain.Connect())
             {
                 toolStripStatusLabel.Text = "Connection failed!!!";
@@ -110,6 +110,28 @@ namespace CurtainWindows
                 Thread.Sleep(1000);
                 trackBarPosition.Value = curtain.GetPosition();
                 this.tbPosition.Text = trackBarPosition.Value.ToString();
+            }
+        }
+
+        private void frmMain_Resize(object sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.Hide();
+            }
+        }
+
+        private void notifyIcon_DoubleClick(object sender, EventArgs e)
+        {
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+        }
+
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (MessageBox.Show("Really close?", "Confirm program termination", MessageBoxButtons.YesNo) == DialogResult.No)
+            {
+                e.Cancel = true;
             }
         }
     }
