@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
@@ -19,10 +20,11 @@ namespace CurtainWindows
             InitializeComponent();
             BaudRate = 9600;
             PortName = "COM7";
-            tbBaudRate.Text = BaudRate.ToString();
+            tbBaudRate.Text = BaudRate.ToString(CultureInfo.InvariantCulture);
             tbPortName.Text = PortName;
 
             CheckConnection();
+            curtain.OnPositionChanged += CurtainPositionChangedHandler;
 
             string line;
             string[] linePrams;
@@ -57,7 +59,7 @@ namespace CurtainWindows
 
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
-            tbPosition.Text = trackBarPosition.Value.ToString();
+            tbPosition.Text = trackBarPosition.Value.ToString(CultureInfo.InvariantCulture);
         }
 
         private void btnGo_Click(object sender, EventArgs e)
@@ -78,14 +80,14 @@ namespace CurtainWindows
             int tmp;
             if (!int.TryParse(tbBaudRate.Text, out tmp))
             {
-                toolStripStatusLabel.Text = "Connection failed !!!";
+                toolStripStatusLabel.Text = @"Connection failed !!!";
                 toolStripStatusLabel.ForeColor = Color.Red;
                 return;
             }
             BaudRate = tmp;
             if (curtain != null)
             {
-                curtain._port.Dispose();
+                curtain.Port.Dispose();
                 curtain = null;
             }
 
@@ -93,17 +95,24 @@ namespace CurtainWindows
 
             if (!curtain.Connect())
             {
-                toolStripStatusLabel.Text = "Connection failed!!!";
+                toolStripStatusLabel.Text = @"Connection failed!!!";
                 toolStripStatusLabel.ForeColor = Color.Red;
             }
             else
             {
-                toolStripStatusLabel.Text = "Connected";
+                toolStripStatusLabel.Text = @"Connected";
                 toolStripStatusLabel.ForeColor = Color.Green;
                 Thread.Sleep(1000);
                 trackBarPosition.Value = curtain.GetPosition();
-                tbPosition.Text = trackBarPosition.Value.ToString();
+                tbPosition.Text = trackBarPosition.Value.ToString(CultureInfo.InvariantCulture);
             }
+        }
+
+
+        private void CurtainPositionChangedHandler(int newPosition)
+        {
+            trackBarPosition.Value = newPosition;
+            tbPosition.Text = newPosition.ToString(CultureInfo.InvariantCulture);
         }
 
         private void frmMain_Resize(object sender, EventArgs e)
@@ -122,7 +131,7 @@ namespace CurtainWindows
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (MessageBox.Show("Really close?", "Confirm program termination", MessageBoxButtons.YesNo) ==
+            if (MessageBox.Show(@"Really close?", @"Confirm program termination", MessageBoxButtons.YesNo) ==
                 DialogResult.No)
             {
                 e.Cancel = true;

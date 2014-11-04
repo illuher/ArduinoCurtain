@@ -6,6 +6,8 @@ using System.Threading;
 
 namespace CurtainDriver
 {
+    public delegate void PositionChanged(int newPosition);
+
     public class Curtain
     {
         public const string CMD_POSITION_GET = "p";
@@ -18,23 +20,25 @@ namespace CurtainDriver
         public const string MOVE_LEFT = "114";
         public const string MOVE_RIGHT = "108";
 
-        public SerialPort _port;
+        public SerialPort Port;
+
+        public event PositionChanged OnPositionChanged;
 
         public Curtain(string name, int baudRate)
         {
-            _port = new SerialPort(name, baudRate);
+            Port = new SerialPort(name, baudRate);
         }
 
         public bool IsConnected
         {
-            get { return _port == null ? false : _port.IsOpen; }
+            get { return Port != null && Port.IsOpen; }
         }
 
         public bool Connect()
         {
             try
             {
-                _port.Open();
+                Port.Open();
             }
             catch (Exception)
             {
@@ -46,7 +50,7 @@ namespace CurtainDriver
         {
             try
             {
-                _port.Close();
+                Port.Close();
             }
             catch (Exception)
             {
@@ -64,10 +68,14 @@ namespace CurtainDriver
                 return -1;
             }
 
-            _port.WriteLine(CMD_POSITION_GET);
-            string pos = _port.ReadLine();
+            Port.WriteLine(CMD_POSITION_GET);
+            string pos = Port.ReadLine();
             Disconnect();
-            int.TryParse(pos, out position);
+            if (int.TryParse(pos, out position))
+            {
+                if (this.OnPositionChanged != null)
+                    this.OnPositionChanged.BeginInvoke(position, null, null);
+            }
 
             return position;
         }
@@ -79,7 +87,11 @@ namespace CurtainDriver
                 return;
             }
 
-            int diff = GetPosition() - newPosition;
+            int currentPosition = GetPosition();
+            if(currentPosition<0)
+                return;
+
+            int diff = currentPosition - newPosition;
             string direction = MOVE_LEFT;
             if (diff < 0)
             {
@@ -88,13 +100,13 @@ namespace CurtainDriver
             string command = CMD_MOVE + " " + direction + " " + speed + " " + Math.Abs(diff);
 
             Connect();
-            _port.WriteLine(command);
+            Port.WriteLine(command);
             Disconnect();
         }
 
         public void StartPending(List<MovementRequest> list)
         {
-            var t = new Thread(() =>
+            Thread t = new Thread(() =>
             {
                 while (true)
                 {
@@ -121,8 +133,8 @@ namespace CurtainDriver
                         Thread.Sleep(DateTime.Today.AddDays(1) - DateTime.Now);
                     }
                 }
-            });
-            t.IsBackground = true;
+                return;
+            }) {IsBackground = true};
             t.Start();
         }
     }
