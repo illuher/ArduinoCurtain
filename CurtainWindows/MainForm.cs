@@ -9,13 +9,13 @@ using CurtainDriver;
 
 namespace CurtainWindows
 {
-    public partial class frmMain : Form
+    public partial class FrmMain : Form
     {
         //CurtainDriver.Curtain curtain = new CurtainDriver.Curtain("COM4", 9600);
-        private Curtain curtain;
+        private Curtain _curtain;
 
 
-        public frmMain()
+        public FrmMain()
         {
             InitializeComponent();
             BaudRate = 9600;
@@ -24,23 +24,24 @@ namespace CurtainWindows
             tbPortName.Text = PortName;
 
             CheckConnection();
-            curtain.OnPositionChanged += CurtainPositionChangedHandler;
+            _curtain.OnPositionChanged += CurtainPositionChangedHandler;
 
-            string line;
-            string[] linePrams;
             var mrl = new List<MovementRequest>();
 
             using (var file = new StreamReader(Environment.CurrentDirectory + "\\" + "MovementRequests.txt"))
             {
+                string line;
                 while ((line = file.ReadLine()) != null)
                 {
-                    linePrams = line.Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
+                    string[] linePrams = line.Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
                     if (linePrams.Length != 3)
                         continue;
-                    var mr = new MovementRequest();
-                    mr.Position = Convert.ToInt32(linePrams[2]);
-                    mr.Day = (DayOfWeek) Convert.ToInt32(linePrams[0]);
-                    mr.Time = TimeSpan.Parse(linePrams[1]);
+                    var mr = new MovementRequest
+                    {
+                        Position = Convert.ToInt32(linePrams[2]),
+                        Day = (DayOfWeek) Convert.ToInt32(linePrams[0]),
+                        Time = TimeSpan.Parse(linePrams[1])
+                    };
                     mrl.Add(mr);
                     //MessageBox.Show(line);
                 }
@@ -50,7 +51,7 @@ namespace CurtainWindows
 
             if (mrl.Count > 0)
             {
-                curtain.StartPending(mrl);
+                _curtain.StartPending(mrl);
             }
         }
 
@@ -66,7 +67,7 @@ namespace CurtainWindows
         {
             //MessageBox.Show(trackBarPosition.Value.ToString());
 
-            curtain.MoveToPosition(trackBarPosition.Value);
+            _curtain.MoveToPosition(trackBarPosition.Value);
         }
 
         private void btnConnect_Click(object sender, EventArgs e)
@@ -85,15 +86,15 @@ namespace CurtainWindows
                 return;
             }
             BaudRate = tmp;
-            if (curtain != null)
+            if (_curtain != null)
             {
-                curtain.Port.Dispose();
-                curtain = null;
+                _curtain.Port.Dispose();
+                _curtain = null;
             }
 
-            curtain = new Curtain(PortName, BaudRate);
+            _curtain = new Curtain(PortName, BaudRate);
 
-            if (!curtain.Connect())
+            if (!_curtain.Connect())
             {
                 toolStripStatusLabel.Text = @"Connection failed!!!";
                 toolStripStatusLabel.ForeColor = Color.Red;
@@ -103,7 +104,7 @@ namespace CurtainWindows
                 toolStripStatusLabel.Text = @"Connected";
                 toolStripStatusLabel.ForeColor = Color.Green;
                 Thread.Sleep(1000);
-                trackBarPosition.Value = curtain.GetPosition();
+                trackBarPosition.Value = _curtain.GetPosition();
                 tbPosition.Text = trackBarPosition.Value.ToString(CultureInfo.InvariantCulture);
             }
         }
